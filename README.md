@@ -6,8 +6,8 @@ This is a package for analyzing events with HH-like final states on the NAF.
 cmsrel CMSSW_10_1_0
 cd CMSSW_10_1_0/src
 cmsenv
-git clone https://github.com/UhhCmsAnalysis/UhhhhAnalysis/
-cd UhhhhAnalysis/
+git clone https://github.com/UhhCmsAnalysis/QuarkGluonKoala.git/
+cd QuarkGluonKoala.git/
 mkdir output output/smallchunks output/mediumchunks output/bigchunks
 mkdir jobs
 mkdir pdfs
@@ -16,14 +16,30 @@ mkdir pdfs
 ## run event analyzer script to generate histograms
 ### examples:
 
-run over a signal file
+run over a semi-leptonic tt-jets file:
 ```
-python tools/EventAnalyzer.py --fnamekeyword /pnfs/desy.de/cms/tier2/store/user/sbein/NtupleHub/SpecialSM/VBFHHTo4B_CV_1_5_C2V_1_C3_1_13TeV-madgraph_file20.root_RA2AnalysisTree.root
+python tools/EventAnalyzer.py --fnamekeyword "/pnfs/desy.de/cms/tier2/store/user/vormwald/NtupleHub/ProductionRun2v3/Summer16.TTJets_SingleLeptFromT_TuneCUETP8M1_13TeV-madgraphMLM-pythia8AOD_40*_RA2AnalysisTree.root"
 ```
 
-run over a background file
+run over inclusive tt-jets file:
 ```
-python tools/EventAnalyzer.py --fnamekeyword  /pnfs/desy.de/cms/tier2/store/user/sbein/NtupleHub/Production2016v2/Summer16.TTJets_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_73_RA2AnalysisTree.root
+python tools/EventAnalyzer.py --fnamekeyword  "/pnfs/desy.de/cms/tier2/store/user/vormwald/NtupleHub/ProductionRun2v3/Summer16.TTJets_TuneCUETP8M1_13TeV-madgraphMLM-pythia8AOD_10*_RA2AnalysisTree.root"
+```
+
+run over w+jets:
+```
+python tools/EventAnalyzer.py --fnamekeyword  "/pnfs/desy.de/cms/tier2/store/user/vormwald/NtupleHub/ProductionRun2v3/Summer16.WJetsToLNu_TuneCUETP8M1_13TeV-madgraphMLM-pythia8AOD_0_RA2AnalysisTree.root"
+```
+
+run over signal:
+
+```
+python tools/EventAnalyzer.py --fnamekeyword  "/nfs/dust/cms/user/nissanuv/x1x2x1/signal/ntuples_sum/higgsino_mu100_dm3p28Chi20Chipm_2.root"
+```
+
+run over z+jets:
+```
+python tools/EventAnalyzer.py --fnamekeyword  "/pnfs/desy.de/cms/tier2/store/user/vormwald/NtupleHub/ProductionRun2v3/Summer16.ZJetsToNuNu_HT-100To200_13TeV-madgraphAOD_21*_RA2AnalysisTree.root"
 ```
 
 ## parallelize running of scripts with condor jobs
@@ -36,19 +52,18 @@ bash tools/CleanBird.sh
 
 ### examples:
 
-submit signal jobs (one job per input file)
+submit semi-leptonic tt+jets (one job per input file)
 
 ```
-python tools/SubmitJobs_condor.py --analyzer tools/EventAnalyzer.py --fnamekeyword  "/pnfs/desy.de/cms/tier2/store/user/sbein/NtupleHub/SpecialSM/VBFHHTo4B*.root"
+python tools/SubmitJobs_condor.py --analyzer tools/EventAnalyzer.py --fnamekeyword  "/pnfs/desy.de/cms/tier2/store/user/vormwald/NtupleHub/ProductionRun2v3/Summer16.TTJets_SingleLept*.root"
 ```
 
-submit background jobs (one job per input file)
+submit QCD (one job per input file)
 
 ```
-python tools/SubmitJobs_condor.py --analyzer tools/EventAnalyzer.py --fnamekeyword  "/pnfs/desy.de/cms/tier2/store/user/sbein/NtupleHub/Production2016v2/Summer16.TTJets_TuneCUE*.root"
-python tools/SubmitJobs_condor.py --analyzer tools/EventAnalyzer.py --fnamekeyword  "/pnfs/desy.de/cms/tier2/store/user/sbein/NtupleHub/Production2016v2/Summer16.QCD*.root"
+python tools/SubmitJobs_condor.py --analyzer tools/EventAnalyzer.py --fnamekeyword  "/pnfs/desy.de/cms/tier2/store/user/vormwald/NtupleHub/ProductionRun2v3/Summer16.QCD_HT*.root"
 ```
-
+ 
 files will show up in the folder output/smallchunks. You can check the status of jobs and interact with jobs using
 ```
 condor_q

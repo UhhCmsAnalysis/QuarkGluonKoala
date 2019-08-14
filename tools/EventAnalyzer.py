@@ -8,7 +8,8 @@ from utils import *
 import time
 
 ##read in command line arguments
-defaultInfile_ = "/pnfs/desy.de/cms/tier2/store/user/vormwald/NtupleHub/ProductionRun2v3/Summer16.TTJets_SingleLeptFromT_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_ext1AOD_1035_RA2AnalysisTree.root"
+defaultInfile_ = "/pnfs/desy.de/cms/tier2/store/user/vormwald/NtupleHub/ProductionRun2v3/Summer16.TTJets_SingleLeptFromT_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_ext1AOD_103*_RA2AnalysisTree.root"
+defaultInfile_ = "/pnfs/desy.de/cms/tier2/store/user/vormwald/NtupleHub/ProductionRun2v3/Summer16.TTJets_DiLept_TuneCUETP8M1_13TeV-madgraphMLM-pythia8AOD_0_RA2AnalysisTree.root"
 #T2qqGG.root
 import argparse
 parser = argparse.ArgumentParser()
@@ -24,33 +25,33 @@ printevery = args.printevery
 quickrun = args.quickrun
 if quickrun: n2process = 10000
 else: n2process = 9999999999999
-lumi = 135 #lumi in /pb
 
+if 'Run2016' in fnamekeyword or 'Summer16' in fnamekeyword: 
+    BTAG_CSVv2 = 0.8484
+    BTAG_deepCSV = 0.6324
 
 #Dictionary list of region selection sets
 regionCuts = {}
 pi = 3.14159
 Inf = 9999
-#varlist                    = ['St',     'NCentralJets','NForwardJets', 'BTags', 'MStar',   'DmStar',    'NLeptons']
-regionCuts['NoCuts']        = [[0,Inf],  [0,Inf],       [0,Inf],        [1,Inf], [-Inf,Inf], [0,Inf],  [0,Inf]]
-regionCuts['LooseBaseline'] = [[200,Inf],[4,Inf],       [1,Inf],        [1,Inf], [-Inf,Inf], [0,2],    [0,Inf]]
-regionCuts['TightBaseline'] = [[200,Inf],[4,Inf],       [2,Inf],        [2,Inf], [-Inf,Inf], [0,1],    [0,Inf]]
-
+#varlist                    = ['Ht',      'Met',    'NLeptons'   'NJets', 'BTags'   'Mjj'        'PartonFlav']
+regionCuts['NoCuts']        = [[0,Inf],   [0,Inf],  [1,Inf],     [0,Inf], [0,Inf],  [-Inf,Inf], [-Inf,Inf]]
+regionCuts['qqbarControl']  = [[100,Inf], [50,Inf], [1,1],       [4,5],   [2,2],    [60,100],   [-Inf,Inf]]
+regionCuts['qqbarControlQ'] = [[100,Inf], [50,Inf], [1,1],       [4,5],   [2,2],    [60,100],   [-5,5]]
+regionCuts['qqbarControlG'] = [[100,Inf], [50,Inf], [1,1],       [4,5],   [2,2],    [60,100],   [21,21]]
+    
+    
 ##declare and load a tree
 c = TChain('TreeMaker2/PreSelection')
-for fname in inputFiles: c.Add(fname)
+for fname in inputFiles: 
+	print 'adding', fname, 'to tree'
+	c.Add(fname)
 nentries = c.GetEntries()
 c.Show(0)
 n2process = min(n2process, nentries)
 print 'n(entries) =', n2process
 
-###handle the weight (this is always a bit ugly)
-if 'HH' in fnamekeyword: weightmode = 0# signal
-else: weightmode = 1# background
-HHCrossSection = 0.001#pb
-HHCrossSectionTimesBF = HHCrossSection*pow(0.59,2)
-
-varlist = ['St', 'NCentralJets','NForwardJets', 'BTags', 'MStar', 'DmStar',    'NLeptons']
+varlist = ['Ht', 'Met','NLeptons', 'NJets', 'BTags', 'Mjj', 'PartonFlav']
 indexVar = {}
 for ivar, var in enumerate(varlist): indexVar[var] = ivar
 indexVar[''] = -1
@@ -83,7 +84,6 @@ hHt.Sumw2()
 hHtWeighted = TH1F('hHtWeighted','hHtWeighted',120,0,2500)
 hHtWeighted.Sumw2()
 
-xsec_times_lumi_over_nevents = 1.0
 t0 = time.time()
 for ientry in range(n2process):
 
@@ -92,9 +92,7 @@ for ientry in range(n2process):
 	c.GetEntry(ientry)
 
 	#br = 0.33
-	#weight = 1.0*br*lumi/n2process#c.CrossSection
-	if weightmode==1: weight = c.CrossSection
-	if weightmode==0: weight = HHCrossSectionTimesBF
+	weight = c.CrossSection
 	
 	fillth1(hHt, c.madHT, 1)
 	fillth1(hHtWeighted, c.madHT, weight)	
@@ -102,7 +100,7 @@ for ientry in range(n2process):
 	recomuons = []
 	#build up the vector of jets using TLorentzVectors; 
 	for imu, mu in enumerate(c.Muons):
-		if not mu.Pt()>10: continue
+		if not mu.Pt()>30: continue
 		if not abs(mu.Eta())<2.4: continue
 		tlvmu = TLorentzVector()
 		tlvmu.SetPtEtaPhiE(mu.Pt(), mu.Eta(), mu.Phi(), mu.E())
@@ -111,7 +109,7 @@ for ientry in range(n2process):
 	recoelectrons = []
 	#build up the vector of jets using TLorentzVectors; 
 	for imu, mu in enumerate(c.Electrons):
-		if not mu.Pt()>10: continue
+		if not mu.Pt()>30: continue
 		if not abs(mu.Eta())<2.4: continue
 		tlvmu = TLorentzVector()
 		tlvmu.SetPtEtaPhiE(mu.Pt(), mu.Eta(), mu.Phi(), mu.E())
@@ -119,30 +117,29 @@ for ientry in range(n2process):
 		
 	#build up the vector of jets using TLorentzVectors; 
 	#this is where you have to interface with the input format you're using
-	st = 0
-	recojets_forward = []	
-	recojets_central = []
+	recojets = []
+	lightjets = []
+	nb = 0
 	for ijet, jet in enumerate(c.Jets):
 		if not jet.Pt()>20: continue
-		if not abs(jet.Eta())<5: continue
+		if not abs(jet.Eta())<2.4: continue
+		if c.Jets_bJetTagDeepCSVBvsAll[ijet]>BTAG_deepCSV: nb+=1
+		elif c.Jets_bJetTagDeepCSVBvsAll[ijet]<0.5: lightjets.append([jet, ijet])
 		tlvjet = TLorentzVector()
 		tlvjet.SetPtEtaPhiE(jet.Pt(), jet.Eta(), jet.Phi(), jet.E())
-		st+=jet.Pt()
-		if abs(jet.Eta())<2.5: 
-			recojets_central.append(tlvjet)
-		else: recojets_forward.append(tlvjet)		
+		recojets.append(tlvjet)
 	
-	if len(recojets_central)>3:
-		m01, m23 = (recojets_central[0]+recojets_central[1]).M(), (recojets_central[2]+recojets_central[3]).M()
-		m02, m13 = (recojets_central[0]+recojets_central[2]).M(), (recojets_central[1]+recojets_central[3]).M()
-		m03, m12 = (recojets_central[0]+recojets_central[3]).M(), (recojets_central[1]+recojets_central[2]).M()
-		starlist = [[(m23+m01)/2,abs(m23-m01)/m23], [(m13+m02)/2,abs(m13-m02)/m13],  [(m12+m03)/2,abs(m12-m03)/m12]]
-		mstar, dmstar = sorted(starlist, key=lambda x: x[1])[0]
-		#print 'mstar, dmstar', mstar, dmstar, 'from list', starlist
-	else:
-		mstar, dmstar = -1, 999
-				
-	fv = [st,len(recojets_central),len(recojets_forward), c.BTags, mstar, dmstar, len(recoelectrons)+len(recomuons)]
+	if len(lightjets)>1: 
+		mll = (lightjets[0][0]+lightjets[1][0]).M()
+		partonflav = c.Jets_partonFlavor[lightjets[0][1]]
+	elif len(lightjets)>0:
+		mll = -101.0
+		partonflav = c.Jets_partonFlavor[lightjets[0][1]]	
+	else: 
+		mll = -101.0
+		partonflav = -101.0
+	
+	fv = [c.HT, c.MET, len(recoelectrons)+len(recomuons), len(recojets), nb, mll, partonflav]
 	for regionkey in regionCuts:
 		for ivar, varname in enumerate(varlist):
 			hname = regionkey+'_'+varname
