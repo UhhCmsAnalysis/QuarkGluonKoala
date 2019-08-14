@@ -1,5 +1,5 @@
-# Uhhhh
-This is a package for analyzing events with HH-like final states on the NAF.
+# UHH Quark-gluon discrimination with Koala
+This is a package for analyzing events with quark and gluon jets on the NAF.
 ## Set up code
 
 ```
