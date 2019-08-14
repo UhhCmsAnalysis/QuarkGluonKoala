@@ -8,7 +8,6 @@ try:
     fnameQ = sys.argv[1]
     fnameG = sys.argv[2]    
 except:
-    print 'doing this shit'
     fnameQ = 'TagProbeTreeQ.root'
     fnameG = 'TagProbeTreeGclever.root'
     #fg = TFile('TagProbeTreeG.root')
@@ -78,6 +77,7 @@ for branch in branches:
     leg.AddEntry(hg,'gluon enriched (pure=%.2f)'%(1.0*hgT.GetEntries()/hg.GetEntries()),'lf')    
     leg.AddEntry(hgT,'gluon enriched (matched g)','lf')        
     leg.Draw()
+    tl.DrawLatex(0.6, 0.6, 'passes baseline selection')
     pad1.Update()
 
     pad2.cd()

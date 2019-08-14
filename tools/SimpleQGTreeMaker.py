@@ -8,12 +8,11 @@ import numpy as np
 datamc = 'mc'
 
 try: fnames = sys.argv[1]
-except: 
-	fnames = '/pnfs/desy.de/cms/tier2/store/user/*/NtupleHub/ProductionRun2v3/Summer16.TTJets_TuneCUETP8M1*70*'
+except:  fnames = '/pnfs/desy.de/cms/tier2/store/user/*/NtupleHub/ProductionRun2v3/Summer16.TTJets_TuneCUETP8M1*70*'
 try: pickprob_ = bool(sys.argv[2])
 except: pickprob_ = False
 
-doGluonTagging = True      
+doGluonTagging = False      
 
 if pickprob_:
 	fPickProbability = TFile('ScaleFactors/PickProbability.root')
@@ -29,7 +28,10 @@ if datamc == 'mc':
 		c.Add(accessname)
 
 shortinputname = (fnames.split('/')[-1]+'.root').replace('.root.root','.root')
-fnew_ = TFile('treeQG_'+shortinputname,'recreate')
+filename = 'tree_'+shortinputname
+if doGluonTagging: newfilename = filename.replace('tree','treeG')
+else: newfilename = filename.replace('tree','treeQ')
+fnew_ = TFile(newfilename,'recreate')
 
 
 hHt = TH1F('hHt','hHt',100,0,500)

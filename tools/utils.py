@@ -30,7 +30,7 @@ binning['NElectrons']=binning['NLeptons']
 binning['NPhotons']=binning['NLeptons']
 binning['NMuons']=binning['NLeptons']
 binning['BTags']=[6,0,6]
-binning['Ht']=[10,0,2000]
+binning['Ht']=[10,0,500]
 binning['St']=binning['Ht']
 binning['BinNumber'] = [34,0,34]
 binning['PartonFlav'] = [44,-22,22]
@@ -46,7 +46,7 @@ def histoStyler(h,color=kBlack):
 	h.SetLineColor(color)
 	h.SetMarkerColor(color)
 	#h.SetFillColor(color)
-	size = 0.059
+	size = 0.053
 	font = 132
 	h.GetXaxis().SetLabelFont(font)
 	h.GetYaxis().SetLabelFont(font)
@@ -57,7 +57,7 @@ def histoStyler(h,color=kBlack):
 	h.GetXaxis().SetLabelSize(size)   
 	h.GetYaxis().SetLabelSize(size)
 	h.GetXaxis().SetTitleOffset(1.0)
-	h.GetYaxis().SetTitleOffset(1.05)
+	h.GetYaxis().SetTitleOffset(1.5)
 	if not h.GetSumw2N(): h.Sumw2()
 	
 def makeHist(name, title, nb, low, high, color):
@@ -106,7 +106,7 @@ def graphStyler(g,color):
 def mkcanvas(name='c1'):
 	c1 = TCanvas(name,name,750,630)
 	c1.SetBottomMargin(.15)
-	c1.SetLeftMargin(.14)
+	c1.SetLeftMargin(.15)
 	#c1.SetTopMargin(.13)
 	#c1.SetRightMargin(.04)
 	return c1

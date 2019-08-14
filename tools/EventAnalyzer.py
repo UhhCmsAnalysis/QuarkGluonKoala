@@ -8,8 +8,8 @@ from utils import *
 import time
 
 ##read in command line arguments
-defaultInfile_ = "/pnfs/desy.de/cms/tier2/store/user/vormwald/NtupleHub/ProductionRun2v3/Summer16.TTJets_SingleLeptFromT_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_ext1AOD_103*_RA2AnalysisTree.root"
 defaultInfile_ = "/pnfs/desy.de/cms/tier2/store/user/vormwald/NtupleHub/ProductionRun2v3/Summer16.TTJets_DiLept_TuneCUETP8M1_13TeV-madgraphMLM-pythia8AOD_0_RA2AnalysisTree.root"
+defaultInfile_ = "/pnfs/desy.de/cms/tier2/store/user/vormwald/NtupleHub/ProductionRun2v3/Summer16.TTJets_SingleLeptFromT_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_ext1AOD_103*_RA2AnalysisTree.root"
 #T2qqGG.root
 import argparse
 parser = argparse.ArgumentParser()
@@ -36,9 +36,9 @@ pi = 3.14159
 Inf = 9999
 #varlist                    = ['Ht',      'Met',    'NLeptons'   'NJets', 'BTags'   'Mjj'        'PartonFlav']
 regionCuts['NoCuts']        = [[0,Inf],   [0,Inf],  [1,Inf],     [0,Inf], [0,Inf],  [-Inf,Inf], [-Inf,Inf]]
-regionCuts['qqbarControl']  = [[100,Inf], [50,Inf], [1,1],       [4,5],   [2,2],    [60,100],   [-Inf,Inf]]
-regionCuts['qqbarControlQ'] = [[100,Inf], [50,Inf], [1,1],       [4,5],   [2,2],    [60,100],   [-5,5]]
-regionCuts['qqbarControlG'] = [[100,Inf], [50,Inf], [1,1],       [4,5],   [2,2],    [60,100],   [21,21]]
+regionCuts['qqbarControl']  = [[100,Inf], [50,Inf], [1,1],       [4,4],   [2,2],    [60,100],   [-Inf,Inf]]
+regionCuts['qqbarControlQ'] = [[100,Inf], [50,Inf], [1,1],       [4,4],   [2,2],    [60,100],   [1,5]]
+regionCuts['qqbarControlG'] = [[100,Inf], [50,Inf], [1,1],       [4,4],   [2,2],    [60,100],   [21,21]]
     
     
 ##declare and load a tree
@@ -131,10 +131,10 @@ for ientry in range(n2process):
 	
 	if len(lightjets)>1: 
 		mll = (lightjets[0][0]+lightjets[1][0]).M()
-		partonflav = c.Jets_partonFlavor[lightjets[0][1]]
+		partonflav = abs(c.Jets_partonFlavor[lightjets[0][1]])
 	elif len(lightjets)>0:
 		mll = -101.0
-		partonflav = c.Jets_partonFlavor[lightjets[0][1]]	
+		partonflav = abs(c.Jets_partonFlavor[lightjets[0][1]])
 	else: 
 		mll = -101.0
 		partonflav = -101.0
@@ -144,6 +144,7 @@ for ientry in range(n2process):
 		for ivar, varname in enumerate(varlist):
 			hname = regionkey+'_'+varname
 			if selectionFeatureVector(fv,regionkey,varname,''): 
+				if regionkey!='NoCuts' and varname=='PartonFlav': print 'filling ', regionkey, 'with', varname, fv[ivar]
 				fillth1(histoStructDict[hname].Observed, fv[ivar], weight)
 
 
